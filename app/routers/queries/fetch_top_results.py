@@ -5,7 +5,7 @@ from app.utils import client
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 
 
-def fetch_top_request(query):
+async def fetch_top_results(query):
     response = client.search(
         index=INDEX_NAME,
         body={
@@ -25,10 +25,7 @@ def fetch_top_request(query):
                     "minimum_should_match": 1,
                 }
             },
-            "sort": [{"timestamp": {"order": "desc"}}],
         },
     )
 
-    print(response)
-
-    return response["hits"]["hits"][0]["_source"] if response["hits"]["hits"] else None
+    return response["hits"]["hits"][0]["_source"] if response["hits"]["hits"] else []

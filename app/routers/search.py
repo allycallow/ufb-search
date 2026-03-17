@@ -1,10 +1,17 @@
+import asyncio
 from http import HTTPStatus
 from os import getenv
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.auth import verify_api_key
-from app.routers.queries import fetch_top_request
+from app.routers.queries import (
+    fetch_top_results,
+    fetch_artist_results,
+    fetch_labels_results,
+    fetch_releases_results,
+    fetch_tracks_results,
+)
 from app.utils import logger
 from app.utils.opensearch import client
 
@@ -23,13 +30,34 @@ async def search(q: str = Query(..., description="Search query"), tags=["search"
             status_code=HTTPStatus.BAD_REQUEST, detail="Query parameter 'q' is required"
         )
 
-    fetch_top_request(q)
+    top_results, artist_results, labels_results, releases_results, tracks_results = (
+        await asyncio.gather(
+            fetch_top_results(q),
+            fetch_artist_results(q),
+            fetch_labels_results(q),
+            fetch_releases_results(q),
+            fetch_tracks_results(q),
+        )
+    )
 
-    results = [
-        {"id": 1, "title": "Result 1", "query": q},
-        {"id": 2, "title": "Result 2", "query": q},
-    ]
-    return {"results": results}
+    print("--")
+    print(top_results)
+    print(artist_results)
+    print(labels_results)
+    print(releases_results)
+    print(tracks_results)
+    print("--")
+
+    return {
+        "results": {
+            "top": top_results,
+            "artists": artist_results,
+            "labels": labels_results,
+            "releases": releases_results,
+            "tracks": tracks_results,
+            "playlists": [],
+        }
+    }
 
 
 @router.get("/{item_id}")
