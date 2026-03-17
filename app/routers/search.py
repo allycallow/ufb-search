@@ -8,9 +8,13 @@ from pydantic import BaseModel, Field
 
 from app.auth import verify_api_key
 from app.routers.get_item import get_item_details
-from app.routers.queries import (fetch_artist_results, fetch_labels_results,
-                                 fetch_releases_results, fetch_top_results,
-                                 fetch_tracks_results)
+from app.routers.queries import (
+    fetch_artist_results,
+    fetch_labels_results,
+    fetch_releases_results,
+    fetch_top_results,
+    fetch_tracks_results,
+)
 from app.utils import logger
 from app.utils.opensearch import client
 
@@ -85,15 +89,6 @@ async def get_search_item(item_id: str):
     return {"id": item_id, "title": f"Result {item_id}", "query": "example query"}
 
 
-@router.put(
-    "/{item_id}",
-    tags=["custom"],
-    responses={HTTPStatus.FORBIDDEN.value: {"description": "Operation forbidden"}},
-)
-async def update_search_item(item_id: str):
-    return {"item_id": item_id, "name": "The great Plumbus"}
-
-
 @router.post("/add", description="Add item to index", tags=["custom"])
 async def create_search_item(event: Event):
     logger.info("Creating search item", extra={"event": event.model_dump()})
@@ -113,13 +108,37 @@ async def create_search_item(event: Event):
     return {"success": True}
 
 
-@router.delete(
-    "/{item_id}",
-    tags=["search"],
-    responses={HTTPStatus.FORBIDDEN.value: {"description": "Operation forbidden"}},
-)
-async def delete_search_item(item_id: str):
-    return {"item_id": item_id, "name": "The great Plumbus"}
+@router.put("/update", description="Update item to index", tags=["custom"])
+async def update_search_item(event: Event):
+    logger.info("Updating search item", extra={"event": event.model_dump()})
+
+    type = fetch_type(event.detail_type.split(".")[0].lower())
+
+    response = get_item_details(event.detail.id, type)
+
+    client.update(
+        index=INDEX,
+        id=event.detail.id,
+        body={
+            "doc": {**response, "type": type},
+            "doc_as_upsert": True,
+        },
+    )
+
+    logger.info("Search item updated successfully", extra={"item_id": event.detail.id})
+
+    return {"success": True}
+
+
+@router.put("/delete", description="Delete item from index", tags=["custom"])
+async def delete_search_item(event: Event):
+    logger.info("Deleting search item", extra={"event": event.model_dump()})
+
+    client.update(index=INDEX, id=event.detail.id)
+
+    logger.info("Search item updated successfully", extra={"item_id": event.detail.id})
+
+    return {"success": True}
 
 
 @router.post(
