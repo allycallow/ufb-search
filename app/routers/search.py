@@ -8,13 +8,9 @@ from pydantic import BaseModel, Field
 
 from app.auth import verify_api_key
 from app.routers.get_item import get_item_details
-from app.routers.queries import (
-    fetch_artist_results,
-    fetch_labels_results,
-    fetch_releases_results,
-    fetch_top_results,
-    fetch_tracks_results,
-)
+from app.routers.queries import (fetch_artist_results, fetch_labels_results,
+                                 fetch_releases_results, fetch_top_results,
+                                 fetch_tracks_results)
 from app.utils import logger
 from app.utils.opensearch import client
 
