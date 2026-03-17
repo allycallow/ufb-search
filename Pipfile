@@ -17,12 +17,15 @@ types-boto3 = "*"
 requests = "*"
 sentry-sdk = "*"
 logtail-python = "*"
+pytest = "*"
+pytest-asyncio = "*"
 
 [scripts]
 flake8 = "flake8 app"
 black = "black app"
 isort = "isort app"
 mypy = "mypy app"
+tests = "pytest"
 
 [dev-packages]
 

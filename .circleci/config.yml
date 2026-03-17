@@ -21,6 +21,9 @@ jobs:
       - run:
           name: Mypy type checking
           command: pipenv run mypy
+      - run:
+          name: Run tests
+          command: pipenv run tests
 
 workflows:
   deploy:
