@@ -19,7 +19,7 @@ if IS_LOCAL:
 else:
     session = boto3.Session()
     client = OpenSearch(
-        hosts=[{"host": OPENSEARCH_DOMAIN_ENDPOINT, "port": 9200}],
+        hosts=[{"host": OPENSEARCH_DOMAIN_ENDPOINT, "port": 443}],
         http_auth=AWSV4SignerAuth(session.get_credentials(), REGION, "es"),
         connection_class=RequestsHttpConnection,
         use_ssl=True,
