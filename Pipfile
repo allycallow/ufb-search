@@ -10,11 +10,13 @@ flake8 = "*"
 black = "*"
 isort = "*"
 loguru = "*"
+mypy = "*"
 
 [scripts]
 flake8 = "flake8 app"
 black = "black app"
 isort = "isort app"
+mypy = "mypy app"
 
 [dev-packages]
 

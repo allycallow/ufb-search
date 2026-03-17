@@ -13,6 +13,10 @@ jobs:
           name: Lint with flake8
           command: pipenv run flake8
 
+      - run:
+          name: Mypy type checking
+          command: pipenv run mypy app
+
 workflows:
   deploy:
     jobs:
