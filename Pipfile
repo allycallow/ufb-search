@@ -11,6 +11,9 @@ black = "*"
 isort = "*"
 loguru = "*"
 mypy = "*"
+boto3 = "*"
+opensearch-py = "*"
+types-boto3 = "*"
 
 [scripts]
 flake8 = "flake8 app"
