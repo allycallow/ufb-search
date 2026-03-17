@@ -1,0 +1,19 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/python:3.13
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pipenv install
+      - run:
+          name: Lint with flake8
+          command: pipenv run flake8
+
+workflows:
+  deploy:
+    jobs:
+      - test
