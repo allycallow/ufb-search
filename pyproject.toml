@@ -2,5 +2,5 @@
 profile = "black"
 
 [tool.pytest_env]
-IS_LOCAL: true
-OPENSEARCH_DOMAIN_ENDPOINT: "search-logs-abcdefg1234567.us-west-2.es.amazonaws.com"
+IS_LOCAL=true
+OPENSEARCH_DOMAIN_ENDPOINT="search-logs-abcdefg1234567.us-west-2.es.amazonaws.com"
