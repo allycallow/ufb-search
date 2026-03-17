@@ -32,4 +32,8 @@ async def fetch_artist_results(query):
         },
     )
 
-    return response["hits"]["hits"] if response["hits"]["hits"] else []
+    return (
+        list(map(lambda hit: hit["_source"], response["hits"]["hits"]))
+        if response["hits"]["hits"]
+        else []
+    )
