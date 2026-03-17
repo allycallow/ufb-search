@@ -28,4 +28,8 @@ async def fetch_top_results(query):
         },
     )
 
-    return response["hits"]["hits"][0]["_source"] if response["hits"]["hits"] else []
+    return (
+        list(map(lambda hit: hit["_source"], response["hits"]["hits"]))
+        if response["hits"]["hits"]
+        else []
+    )
