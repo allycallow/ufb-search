@@ -6,6 +6,7 @@ jobs:
       - image: cimg/python:3.13
     environment:
       IS_LOCAL: true
+      OPENSEARCH_DOMAIN_ENDPOINT: "search-logs-abcdefg1234567.us-west-2.es.amazonaws.com"
     steps:
       - checkout
       - run:
