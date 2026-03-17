@@ -9,6 +9,7 @@ uvicorn = "*"
 flake8 = "*"
 black = "*"
 isort = "*"
+loguru = "*"
 
 [scripts]
 flake8 = "flake8 app"

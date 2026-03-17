@@ -3,12 +3,14 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, Query
 
 from app.auth import verify_api_key
+from app.utils import logger
 
 router = APIRouter(dependencies=[Depends(verify_api_key)])
 
 
 @router.get("/")
 async def search(q: str = Query(..., description="Search query"), tags=["search"]):
+    logger.info("Search query received", extra={"query": q})
     results = [
         {"id": 1, "title": "Result 1", "query": q},
         {"id": 2, "title": "Result 2", "query": q},
