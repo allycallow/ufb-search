@@ -19,6 +19,7 @@ sentry-sdk = "*"
 logtail-python = "*"
 pytest = "*"
 pytest-asyncio = "*"
+types-requests = "*"
 
 [scripts]
 flake8 = "flake8 app"

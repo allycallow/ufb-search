@@ -2,7 +2,7 @@ import json
 import sys
 from os import getenv
 
-from logtail import LogtailHandler
+from logtail import LogtailHandler  # type: ignore
 from loguru import logger
 
 BETTER_STACK_TOKEN = getenv("BETTER_STACK_TOKEN")
