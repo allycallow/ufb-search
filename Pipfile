@@ -16,6 +16,7 @@ opensearch-py = "*"
 types-boto3 = "*"
 requests = "*"
 sentry-sdk = "*"
+logtail-python = "*"
 
 [scripts]
 flake8 = "flake8 app"

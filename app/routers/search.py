@@ -62,13 +62,15 @@ async def search(q: str = Query(..., description="Search query"), tags=["search"
             status_code=HTTPStatus.BAD_REQUEST, detail="Query parameter 'q' is required"
         )
 
+    decode = q.encode("utf-8").decode("unicode_escape")
+
     top_results, artist_results, labels_results, releases_results, tracks_results = (
         await asyncio.gather(
-            fetch_top_results(q),
-            fetch_artist_results(q),
-            fetch_labels_results(q),
-            fetch_releases_results(q),
-            fetch_tracks_results(q),
+            fetch_top_results(decode),
+            fetch_artist_results(decode),
+            fetch_labels_results(decode),
+            fetch_releases_results(decode),
+            fetch_tracks_results(decode),
         )
     )
 
