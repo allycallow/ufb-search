@@ -2,20 +2,17 @@ import asyncio
 from http import HTTPStatus
 from os import getenv
 from typing import List
-from pydantic import BaseModel, Field
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from app.auth import verify_api_key
-from app.routers.queries import (
-    fetch_top_results,
-    fetch_artist_results,
-    fetch_labels_results,
-    fetch_releases_results,
-    fetch_tracks_results,
-)
+from app.routers.get_item import get_item_details
+from app.routers.queries import (fetch_artist_results, fetch_labels_results,
+                                 fetch_releases_results, fetch_top_results,
+                                 fetch_tracks_results)
 from app.utils import logger
 from app.utils.opensearch import client
-from app.routers.get_item import get_item_details
 
 router = APIRouter(dependencies=[Depends(verify_api_key)])
 

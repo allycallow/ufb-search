@@ -1,10 +1,10 @@
-import sentry_sdk
+from os import getenv
 
+import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from .routers import search_router
-from os import getenv
 
 SENTRY_DSN = getenv("SENTRY_DSN", None)
 STAGE = getenv("STAGE", "local")

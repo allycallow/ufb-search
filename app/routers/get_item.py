@@ -1,6 +1,8 @@
-import requests
-from app.utils.logger import logger
 from os import getenv
+
+import requests
+
+from app.utils.logger import logger
 
 BACKEND_API_ENDPOINT = getenv("BACKEND_API_ENDPOINT", "http://localhost:8000")
 BACKEND_API_KEY = getenv("BACKEND_API_KEY", "XXX-XXX-XXX")

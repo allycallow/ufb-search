@@ -1,4 +1,5 @@
 from os import getenv
+
 from app.utils import client
 
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
