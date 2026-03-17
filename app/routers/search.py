@@ -89,3 +89,19 @@ async def create_index(
     logger.info("Index created successfully")
 
     return {"success": True}
+
+
+@router.post("/delete-index")
+async def delete_index(
+    description="Delete index",
+    tags=["search"],
+):
+    logger.info("Deleting index")
+
+    client.indices.delete_index(
+        index=INDEX,
+    )
+
+    logger.info("Index deleted successfully")
+
+    return {"success": True}
