@@ -14,6 +14,8 @@ mypy = "*"
 boto3 = "*"
 opensearch-py = "*"
 types-boto3 = "*"
+requests = "*"
+sentry-sdk = "*"
 
 [scripts]
 flake8 = "flake8 app"

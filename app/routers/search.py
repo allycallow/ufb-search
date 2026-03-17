@@ -1,7 +1,8 @@
 import asyncio
 from http import HTTPStatus
 from os import getenv
-
+from typing import List
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.auth import verify_api_key
@@ -14,10 +15,40 @@ from app.routers.queries import (
 )
 from app.utils import logger
 from app.utils.opensearch import client
+from app.routers.get_item import get_item_details
 
 router = APIRouter(dependencies=[Depends(verify_api_key)])
 
 INDEX = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
+
+
+class Detail(BaseModel):
+    id: str
+
+
+class Event(BaseModel):
+    version: str
+    id: str
+    detail_type: str = Field(..., alias="detail-type")
+    source: str
+    account: str
+    time: str
+    region: str
+    resources: List
+    detail: Detail
+
+
+def fetch_type(type: str):
+    if type == "artist":
+        return "artists"
+    elif type == "label":
+        return "labels"
+    elif type == "release":
+        return "releases"
+    elif type == "track":
+        return "tracks"
+    else:
+        raise ValueError(f"Unknown type: {type}")
 
 
 @router.get("/")
@@ -39,14 +70,6 @@ async def search(q: str = Query(..., description="Search query"), tags=["search"
             fetch_tracks_results(q),
         )
     )
-
-    print("--")
-    print(top_results)
-    print(artist_results)
-    print(labels_results)
-    print(releases_results)
-    print(tracks_results)
-    print("--")
 
     return {
         "results": {
@@ -74,16 +97,23 @@ async def update_search_item(item_id: str):
     return {"item_id": item_id, "name": "The great Plumbus"}
 
 
-@router.post("/")
-async def create_search_item(
-    q: str = Query(..., description="Search query"), tags=["search"]
-):
-    results = [
-        {"id": 1, "title": "Result 1", "query": q},
-        {"id": 2, "title": "Result 2", "query": q},
-    ]
+@router.post("/add", description="Add item to index", tags=["custom"])
+async def create_search_item(event: Event):
+    logger.info("Creating search item", extra={"event": event.model_dump()})
 
-    return {"results": results}
+    type = fetch_type(event.detail_type.split(".")[0].lower())
+
+    response = get_item_details(event.detail.id, type)
+
+    client.index(
+        index=INDEX,
+        id=event.detail.id,
+        body={**response, "type": type},
+    )
+
+    logger.info("Search item created successfully", extra={"item_id": event.detail.id})
+
+    return {"success": True}
 
 
 @router.delete(
@@ -95,11 +125,12 @@ async def delete_search_item(item_id: str):
     return {"item_id": item_id, "name": "The great Plumbus"}
 
 
-@router.post("/create-index")
-async def create_index(
+@router.post(
+    "/create-index",
     description="Create index",
     tags=["search"],
-):
+)
+async def create_index():
     logger.info("Creating index")
 
     client.indices.create(
@@ -119,11 +150,12 @@ async def create_index(
     return {"success": True}
 
 
-@router.post("/delete-index")
-async def delete_index(
+@router.post(
+    "/delete-index",
     description="Delete index",
     tags=["search"],
-):
+)
+async def delete_index():
     logger.info("Deleting index")
 
     client.indices.delete_index(

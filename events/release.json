@@ -1,0 +1,14 @@
+{
+    "version": "0",
+    "id": "56b72ae4-6041-49a1-916a-23b7028f3718",
+    "detail-type": "release.created",
+    "source": "app",
+    "account": "123456789012",
+    "time": "2024-07-06T12:59:28.781Z",
+    "region": "us-west-2",
+    "resources": [],
+    "detail":{
+        "id": "ef879f4b-fd8a-4975-a9d4-e03e5f3368d4"
+    }
+
+}

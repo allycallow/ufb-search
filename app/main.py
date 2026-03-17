@@ -1,7 +1,15 @@
+import sentry_sdk
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from .routers import search_router
+from os import getenv
+
+SENTRY_DSN = getenv("SENTRY_DSN", None)
+STAGE = getenv("STAGE", "local")
+
+sentry_sdk.init(dsn=SENTRY_DSN, send_default_pii=True, environment=STAGE)
 
 app = FastAPI()
 
@@ -21,6 +29,11 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+@app.get("/sentry-debug")
+async def trigger_error():
+    raise Exception("This is a test exception for Sentry debugging")
 
 
 app.include_router(search_router, prefix="/api/search", tags=["search"])
