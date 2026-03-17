@@ -20,6 +20,7 @@ logtail-python = "*"
 pytest = "*"
 pytest-asyncio = "*"
 types-requests = "*"
+pytest-env = "*"
 
 [scripts]
 flake8 = "flake8 app"
