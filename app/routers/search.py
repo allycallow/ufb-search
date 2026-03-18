@@ -132,13 +132,13 @@ async def update_search_item(event: Event):
     return {"success": True}
 
 
-@router.put("/delete", description="Delete item from index", tags=["custom"])
+@router.delete("/delete", description="Delete item from index", tags=["custom"])
 async def delete_search_item(event: Event):
     logger.info("Deleting search item", extra={"event": event.model_dump()})
 
-    client.update(index=INDEX, id=event.detail.id)
+    client.delete(index=INDEX, id=event.detail.id)
 
-    logger.info("Search item updated successfully", extra={"item_id": event.detail.id})
+    logger.info("Search item deleted successfully", extra={"item_id": event.detail.id})
 
     return {"success": True}
 
