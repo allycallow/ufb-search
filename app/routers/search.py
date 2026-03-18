@@ -52,8 +52,8 @@ def fetch_type(type: str):
         raise ValueError(f"Unknown type: {type}")
 
 
-@router.get("/")
-async def search(q: str = Query(..., description="Search query"), tags=["search"]):
+@router.get("/", description="Search query", tags=["search"])
+async def search(q: str = Query(..., description="Search query")):
     logger.info("Search query received", extra={"query": q})
 
     if not q:
@@ -86,9 +86,38 @@ async def search(q: str = Query(..., description="Search query"), tags=["search"
     }
 
 
-@router.get("/{item_id}")
-async def get_search_item(item_id: str):
-    return {"id": item_id, "title": f"Result {item_id}", "query": "example query"}
+@router.get("/artists", description="Search artists", tags=["search"])
+async def search_artists(q: str = Query(..., description="Search query")):
+    logger.info("Artist search query received", extra={"query": q})
+
+    if not q:
+        logger.warning("Empty search query received")
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail="Query parameter 'q' is required"
+        )
+
+    decode = q.encode("utf-8").decode("unicode_escape")
+
+    results = await fetch_artist_results(decode)
+
+    return {"results": results}
+
+
+@router.get("/labels", description="Search labels", tags=["search"])
+async def search_labels(q: str = Query(..., description="Search query")):
+    logger.info("Label search query received", extra={"query": q})
+
+    if not q:
+        logger.warning("Empty search query received")
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail="Query parameter 'q' is required"
+        )
+
+    decode = q.encode("utf-8").decode("unicode_escape")
+
+    results = await fetch_labels_results(decode)
+
+    return {"results": results}
 
 
 @router.post("/add", description="Add item to index", tags=["custom"])
