@@ -34,8 +34,10 @@ jobs:
           command: pipenv run tests
 
   build-deploy:
-    docker:
-      - image: cimg/aws:2025.01
+    machine:
+      image: ubuntu-2204:2024.01.1
+      docker_layer_caching: true
+    resource_class: arm.medium
     steps:
       - checkout
       - aws-cli/setup:
