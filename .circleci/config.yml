@@ -46,8 +46,6 @@ jobs:
           profile_name: "OIDC-PROFILE"
           role_session_name: "example-session"
           session_duration: "1800"
-      - setup_remote_docker:
-          docker_layer_caching: true
       - aws-ecr/build_and_push_image:
           account_id: "081077757258"
           auth:
