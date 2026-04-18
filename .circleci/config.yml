@@ -27,7 +27,7 @@ jobs:
           command: pipenv run sort --check-only
       - run:
           name: Mypy type checking
-          command: pipenv run mypy
+          command: pipenv run type_check
       # - run:
       #     name: Run tests
       #     command: pipenv run tests
