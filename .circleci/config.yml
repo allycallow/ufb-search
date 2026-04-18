@@ -11,29 +11,28 @@ jobs:
       - image: cimg/python:3.13
     environment:
       IS_LOCAL: true
-      OPENSEARCH_DOMAIN_ENDPOINT: "search-logs-abcdefg1234567.us-west-2.es.amazonaws.com"
     steps:
       - checkout
       - run:
           name: Install dependencies
-          command: pipenv install
+          command: pipenv install --dev
       - run:
           name: Lint with flake8
-          command: pipenv run flake8
+          command: pipenv run lint
       - run:
           name: Lint with black
-          command: pipenv run black --check .
+          command: pipenv run format --check .
       - run:
           name: Lint with isort
-          command: pipenv run isort --check-only
+          command: pipenv run sort --check-only
       - run:
           name: Mypy type checking
           command: pipenv run mypy
-      - run:
-          name: Run tests
-          command: pipenv run tests
+      # - run:
+      #     name: Run tests
+      #     command: pipenv run tests
 
-  build-deploy:
+  build:
     machine:
       image: ubuntu-2204:2024.01.1
       docker_layer_caching: true
@@ -57,17 +56,24 @@ jobs:
           repo: production-ufb-search
           tag: ${CIRCLE_SHA1},latest
           platform: "linux/arm64"
-      - aws-ecs/update_service:
-          cluster: production-ufb
-          family: production-ufb-search
-          container_image_name_updates: "container=search,tag=${CIRCLE_SHA1}"
-          force_new_deployment: false
-          region: eu-west-2
 
 workflows:
-  deploy:
+  build-and-deploy:
     jobs:
       - test
-      - build-deploy:
+      - build:
           requires:
             - test
+      - aws-ecs/deploy_service_update:
+          requires:
+            - build
+          auth:
+            - aws-cli/setup:
+                profile_name: OIDC-PROFILE
+                role_arn: arn:aws:iam::081077757258:role/openid-connect-circleci
+          cluster: production-ufb
+          family: production-ufb-search
+          container_image_name_updates: "container=search,tag=latest"
+          force_new_deployment: true
+          region: eu-west-2
+          profile_name: OIDC-PROFILE

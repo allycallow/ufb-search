@@ -6,11 +6,7 @@ name = "pypi"
 [packages]
 fastapi = "*"
 uvicorn = "*"
-flake8 = "*"
-black = "*"
-isort = "*"
 loguru = "*"
-mypy = "*"
 boto3 = "*"
 opensearch-py = "*"
 types-boto3 = "*"
@@ -23,13 +19,17 @@ types-requests = "*"
 pytest-env = "*"
 
 [scripts]
-flake8 = "flake8 app"
-black = "black app"
-isort = "isort app"
-mypy = "mypy app"
+lint = "flake8 ."
+format = "black ."
+sort = "isort ."
+type_check = "mypy ."
 tests = "pytest"
 
 [dev-packages]
+flake8 = "*"
+black = "*"
+isort = "*"
+mypy = "*"
 
 [requires]
 python_version = "3.13"
