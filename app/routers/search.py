@@ -16,6 +16,7 @@ from app.routers.queries import (
     fetch_tracks_results,
 )
 from app.utils import logger
+from app.utils.metrics import search_queries_total, search_terms_total
 from app.utils.opensearch import client
 
 router = APIRouter(dependencies=[Depends(verify_api_key)])
@@ -64,6 +65,9 @@ async def search(q: str = Query(..., description="Search query")):
 
     decode = q.encode("utf-8").decode("unicode_escape")
 
+    search_queries_total.labels(endpoint="general").inc()
+    search_terms_total.labels(term=decode.lower().strip()).inc()
+
     top_results, artist_results, labels_results, releases_results, tracks_results = (
         await asyncio.gather(
             fetch_top_results(decode),
@@ -98,6 +102,9 @@ async def search_artists(q: str = Query(..., description="Search query")):
 
     decode = q.encode("utf-8").decode("unicode_escape")
 
+    search_queries_total.labels(endpoint="artists").inc()
+    search_terms_total.labels(term=decode.lower().strip()).inc()
+
     results = await fetch_artist_results(decode)
 
     return {"results": results}
@@ -114,6 +121,9 @@ async def search_labels(q: str = Query(..., description="Search query")):
         )
 
     decode = q.encode("utf-8").decode("unicode_escape")
+
+    search_queries_total.labels(endpoint="labels").inc()
+    search_terms_total.labels(term=decode.lower().strip()).inc()
 
     results = await fetch_labels_results(decode)
 

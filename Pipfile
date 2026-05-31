@@ -17,6 +17,7 @@ pytest = "*"
 pytest-asyncio = "*"
 types-requests = "*"
 pytest-env = "*"
+prometheus-fastapi-instrumentator = "*"
 
 [scripts]
 lint = "flake8 ."

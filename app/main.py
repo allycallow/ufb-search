@@ -3,6 +3,7 @@ from os import getenv
 import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from .routers import search_router
 
@@ -12,6 +13,8 @@ STAGE = getenv("STAGE", "local")
 sentry_sdk.init(dsn=SENTRY_DSN, send_default_pii=True, environment=STAGE)
 
 app = FastAPI()
+
+Instrumentator().instrument(app).expose(app)
 
 
 @app.exception_handler(HTTPException)
