@@ -18,6 +18,7 @@ pytest-asyncio = "*"
 types-requests = "*"
 pytest-env = "*"
 prometheus-fastapi-instrumentator = "*"
+httpx2 = "*"
 
 [scripts]
 lint = "flake8 ."
