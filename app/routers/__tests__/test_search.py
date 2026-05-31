@@ -55,11 +55,21 @@ class TestAuth:
     def test_valid_api_key_passes(self, unauthenticated_client, monkeypatch):
         monkeypatch.setattr("app.auth.API_KEY", "valid-key")
         with (
-            patch("app.routers.search.fetch_top_results", new_callable=AsyncMock) as mock_top,
-            patch("app.routers.search.fetch_artist_results", new_callable=AsyncMock) as mock_artists,
-            patch("app.routers.search.fetch_labels_results", new_callable=AsyncMock) as mock_labels,
-            patch("app.routers.search.fetch_releases_results", new_callable=AsyncMock) as mock_releases,
-            patch("app.routers.search.fetch_tracks_results", new_callable=AsyncMock) as mock_tracks,
+            patch(
+                "app.routers.search.fetch_top_results", new_callable=AsyncMock
+            ) as mock_top,
+            patch(
+                "app.routers.search.fetch_artist_results", new_callable=AsyncMock
+            ) as mock_artists,
+            patch(
+                "app.routers.search.fetch_labels_results", new_callable=AsyncMock
+            ) as mock_labels,
+            patch(
+                "app.routers.search.fetch_releases_results", new_callable=AsyncMock
+            ) as mock_releases,
+            patch(
+                "app.routers.search.fetch_tracks_results", new_callable=AsyncMock
+            ) as mock_tracks,
         ):
             mock_top.return_value = []
             mock_artists.return_value = []
@@ -228,7 +238,9 @@ class TestUpdateItem:
 
     @patch("app.routers.search.get_item_details")
     @patch("app.routers.search.client")
-    def test_update_item_uses_doc_as_upsert(self, mock_os_client, mock_get_item, client):
+    def test_update_item_uses_doc_as_upsert(
+        self, mock_os_client, mock_get_item, client
+    ):
         mock_get_item.return_value = {"name": "Test"}
 
         client.put("/api/search/update", json=VALID_EVENT)
