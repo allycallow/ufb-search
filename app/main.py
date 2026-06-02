@@ -3,19 +3,20 @@ from os import getenv
 import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from prometheus_fastapi_instrumentator import Instrumentator
 
 # --- OpenTelemetry Imports ---
 from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from prometheus_fastapi_instrumentator import Instrumentator
+
+from .routers import search_router
 
 # ------------------------------
 
-from .routers import search_router
 
 SENTRY_DSN = getenv("SENTRY_DSN", None)
 STAGE = getenv("STAGE", "local")
