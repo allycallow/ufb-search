@@ -30,7 +30,7 @@ def initialize_tracing(fastapi_app: FastAPI):
     try:
         # Service name as it will appear inside the Jaeger UI dropdown
         resource = Resource.create(
-            attributes={"search-service": "fastapi-microservice"}
+            attributes={"service.search": "fastapi-microservice"}
         )
         provider = TracerProvider(resource=resource)
 
