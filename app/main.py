@@ -30,9 +30,7 @@ app = FastAPI()
 def initialize_tracing(fastapi_app: FastAPI):
     try:
         # Service name as it will appear inside the Jaeger UI dropdown
-        resource = Resource.create(
-            attributes={"service.name": "search-service"}
-        )
+        resource = Resource.create(attributes={"service.name": "search-service"})
         provider = TracerProvider(resource=resource)
 
         # Reads target Jaeger gRPC endpoint from environment variables (e.g., OTEL_EXPORTER_OTLP_ENDPOINT)
