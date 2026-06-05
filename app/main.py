@@ -41,7 +41,9 @@ def initialize_tracing(fastapi_app: FastAPI):
         trace.set_tracer_provider(provider)
 
         # Instrument FastAPI (extracts trace context from inbound Django headers automatically)
-        FastAPIInstrumentor.instrument_app(fastapi_app)
+        FastAPIInstrumentor.instrument_app(
+            fastapi_app, excluded_urls="metrics,sentry-debug"
+        )
         print("OpenTelemetry tracing successfully initialized for FastAPI.")
     except Exception as e:
         print(f"Failed to initialize OpenTelemetry tracing: {e}")
