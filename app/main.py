@@ -52,7 +52,7 @@ initialize_tracing(app)
 # ----------------------------
 
 # Prometheus setup (keeps metrics running cleanly alongside tracing)
-Instrumentator().instrument(app).expose(app)
+Instrumentator().instrument(app, metric_namespace="ufb_search").expose(app)
 
 
 @app.exception_handler(HTTPException)
