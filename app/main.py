@@ -60,7 +60,9 @@ def initialize_tracing(fastapi_app: FastAPI):
 
         # Patches grpc.aio.server so the gRPC server created in create_grpc_server()
         # picks up tracing automatically once it starts.
-        GrpcAioInstrumentorServer().instrument()
+        GrpcAioInstrumentorServer().instrument(
+            excluded_methods=["metrics", "sentry-debug"]
+        )
 
         print("OpenTelemetry tracing successfully initialized for FastAPI.")
     except Exception as e:
