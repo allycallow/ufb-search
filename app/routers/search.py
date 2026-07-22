@@ -199,6 +199,11 @@ async def create_index():
                     "number_of_replicas": 0,
                 },
             },
+            "mappings": {
+                "properties": {
+                    "popularity": {"type": "integer"},
+                },
+            },
         },
     )
 

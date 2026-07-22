@@ -7,7 +7,7 @@ from app.utils import client, logger
 
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 
-SEED_DOCUMENTS: list[dict[str, str | None]] = [
+SEED_DOCUMENTS: list[dict[str, str | int | None]] = [
     {
         "id": "87ffaaec-3042-43c7-9890-5cf845aaf40c",
         "created_at": "2023-12-15T18:08:57.211246Z",
@@ -19,6 +19,7 @@ SEED_DOCUMENTS: list[dict[str, str | None]] = [
         "main_image": "https://cdn.upfrontbeats.com/images/main/hot-creations.jpg",
         "background_image": None,
         "type": "labels",
+        "popularity": 50,
     },
 ]
 
@@ -50,6 +51,11 @@ def seed() -> None:
                     "index": {
                         "number_of_shards": 1,
                         "number_of_replicas": 0,
+                    },
+                },
+                "mappings": {
+                    "properties": {
+                        "popularity": {"type": "integer"},
                     },
                 },
             },

@@ -127,6 +127,11 @@ class SearchServicer(search_pb2_grpc.SearchServiceServicer):
                         "number_of_replicas": 0,
                     },
                 },
+                "mappings": {
+                    "properties": {
+                        "popularity": {"type": "integer"},
+                    },
+                },
             },
         )
 
