@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package ufb_search;
+
+import "google/protobuf/struct.proto";
+
+service SearchService {
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc SearchArtists(SearchRequest) returns (ItemListResponse);
+  rpc SearchLabels(SearchRequest) returns (ItemListResponse);
+  rpc AddItem(ItemEvent) returns (StatusResponse);
+  rpc UpdateItem(ItemEvent) returns (StatusResponse);
+  rpc DeleteItem(ItemEvent) returns (StatusResponse);
+  rpc CreateIndex(Empty) returns (StatusResponse);
+  rpc DeleteIndex(Empty) returns (StatusResponse);
+}
+
+enum ItemType {
+  ARTIST = 0;
+  LABEL = 1;
+  RELEASE = 2;
+  TRACK = 3;
+}
+
+message Empty {}
+
+message SearchRequest {
+  string query = 1;
+}
+
+message SearchResponse {
+  repeated google.protobuf.Struct top = 1;
+  repeated google.protobuf.Struct artists = 2;
+  repeated google.protobuf.Struct labels = 3;
+  repeated google.protobuf.Struct releases = 4;
+  repeated google.protobuf.Struct tracks = 5;
+  repeated google.protobuf.Struct playlists = 6;
+}
+
+message ItemListResponse {
+  repeated google.protobuf.Struct results = 1;
+}
+
+message ItemEvent {
+  string id = 1;
+  ItemType type = 2;
+}
+
+message StatusResponse {
+  bool success = 1;
+}

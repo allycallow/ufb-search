@@ -14,4 +14,6 @@ RUN pipenv install --deploy --ignore-pipfile
 
 COPY app/ ./app/
 
+EXPOSE 8000 50051
+
 CMD ["pipenv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

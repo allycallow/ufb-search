@@ -23,6 +23,8 @@ opentelemetry-api = "*"
 opentelemetry-sdk = "*"
 opentelemetry-exporter-otlp = "*"
 opentelemetry-instrumentation-fastapi = "*"
+grpcio = "*"
+grpcio-reflection = "*"
 
 [scripts]
 lint = "flake8 ."
@@ -30,12 +32,17 @@ format = "black ."
 sort = "isort ."
 type_check = "mypy ."
 tests = "pytest"
+grpc_gen = "python -m grpc_tools.protoc -I app/grpc --python_out=app/grpc --grpc_python_out=app/grpc --pyi_out=app/grpc app/grpc/search.proto"
 
 [dev-packages]
 flake8 = "*"
 black = "*"
 isort = "*"
 mypy = "*"
+grpcio-tools = "*"
+types-grpcio = "*"
+types-protobuf = "*"
+types-grpcio-reflection = "*"
 
 [requires]
 python_version = "3.13"

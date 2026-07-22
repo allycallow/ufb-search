@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from os import getenv
 
 import sentry_sdk
@@ -13,6 +14,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from prometheus_fastapi_instrumentator import Instrumentator
 
+from .grpc.server import create_grpc_server
 from .routers import search_router
 
 # ------------------------------
@@ -23,7 +25,19 @@ STAGE = getenv("STAGE", "local")
 
 sentry_sdk.init(dsn=SENTRY_DSN, send_default_pii=True, environment=STAGE)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI):
+    grpc_server = await create_grpc_server()
+    await grpc_server.start()
+    print("gRPC server started.")
+
+    yield
+
+    await grpc_server.stop(grace=5)
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 # --- OpenTelemetry Setup ---

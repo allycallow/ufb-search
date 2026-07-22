@@ -1,5 +1,12 @@
 [tool.isort]
 profile = "black"
+extend_skip_glob = ["app/grpc/search_pb2.py", "app/grpc/search_pb2.pyi", "app/grpc/search_pb2_grpc.py"]
+
+[tool.black]
+extend-exclude = "app/grpc/search_pb2(_grpc)?\\.py"
+
+[tool.mypy]
+exclude = ["app/grpc/search_pb2.py", "app/grpc/search_pb2.pyi", "app/grpc/search_pb2_grpc.py"]
 
 [tool.pytest_env]
 IS_LOCAL=true

@@ -1,2 +1,3 @@
 [flake8]
 max-line-length = 106
+exclude = app/grpc/search_pb2.py,app/grpc/search_pb2_grpc.py
