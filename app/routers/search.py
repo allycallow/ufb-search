@@ -1,13 +1,10 @@
 import asyncio
 from http import HTTPStatus
 from os import getenv
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
 
 from app.auth import verify_api_key
-from app.routers.get_item import get_item_details
 from app.routers.queries import (
     fetch_artist_results,
     fetch_labels_results,
@@ -22,35 +19,6 @@ from app.utils.opensearch import client
 router = APIRouter(dependencies=[Depends(verify_api_key)])
 
 INDEX = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
-
-
-class Detail(BaseModel):
-    id: str
-
-
-class Event(BaseModel):
-    version: str
-    id: str
-    detail_type: str = Field(..., alias="detail-type")
-    source: str
-    account: str
-    time: str
-    region: str
-    resources: List
-    detail: Detail
-
-
-def fetch_type(type: str):
-    if type == "artist":
-        return "artists"
-    elif type == "label":
-        return "labels"
-    elif type == "release":
-        return "releases"
-    elif type == "track":
-        return "tracks"
-    else:
-        raise ValueError(f"Unknown type: {type}")
 
 
 @router.get("/", description="Search query", tags=["search"])
@@ -128,58 +96,6 @@ async def search_labels(q: str = Query(..., description="Search query")):
     results = await fetch_labels_results(decode)
 
     return {"results": results}
-
-
-@router.post("/add", description="Add item to index", tags=["custom"])
-async def create_search_item(event: Event):
-    logger.info("Creating search item", extra={"event": event.model_dump()})
-
-    type = fetch_type(event.detail_type.split(".")[0].lower())
-
-    response = get_item_details(event.detail.id, type)
-
-    client.index(
-        index=INDEX,
-        id=event.detail.id,
-        body={**response, "type": type},
-    )
-
-    logger.info("Search item created successfully", extra={"item_id": event.detail.id})
-
-    return {"success": True}
-
-
-@router.put("/update", description="Update item to index", tags=["custom"])
-async def update_search_item(event: Event):
-    logger.info("Updating search item", extra={"event": event.model_dump()})
-
-    type = fetch_type(event.detail_type.split(".")[0].lower())
-
-    response = get_item_details(event.detail.id, type)
-
-    client.update(
-        index=INDEX,
-        id=event.detail.id,
-        body={
-            "doc": {**response, "type": type},
-            "doc_as_upsert": True,
-        },
-    )
-
-    logger.info("Search item updated successfully", extra={"item_id": event.detail.id})
-
-    return {"success": True}
-
-
-@router.delete("/delete", description="Delete item from index", tags=["custom"])
-async def delete_search_item(event: Event):
-    logger.info("Deleting search item", extra={"event": event.model_dump()})
-
-    client.delete(index=INDEX, id=event.detail.id)
-
-    logger.info("Search item deleted successfully", extra={"item_id": event.detail.id})
-
-    return {"success": True}
 
 
 @router.post(

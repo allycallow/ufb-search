@@ -1,23 +1,11 @@
 from google.protobuf import struct_pb2 as _struct_pb2
 from google.protobuf.internal import containers as _containers
-from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from collections.abc import Iterable as _Iterable, Mapping as _Mapping
 from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
-
-class ItemType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = ()
-    ARTIST: _ClassVar[ItemType]
-    LABEL: _ClassVar[ItemType]
-    RELEASE: _ClassVar[ItemType]
-    TRACK: _ClassVar[ItemType]
-ARTIST: ItemType
-LABEL: ItemType
-RELEASE: ItemType
-TRACK: ItemType
 
 class Empty(_message.Message):
     __slots__ = ()
@@ -50,14 +38,6 @@ class ItemListResponse(_message.Message):
     RESULTS_FIELD_NUMBER: _ClassVar[int]
     results: _containers.RepeatedCompositeFieldContainer[_struct_pb2.Struct]
     def __init__(self, results: _Optional[_Iterable[_Union[_struct_pb2.Struct, _Mapping]]] = ...) -> None: ...
-
-class ItemEvent(_message.Message):
-    __slots__ = ("id", "type")
-    ID_FIELD_NUMBER: _ClassVar[int]
-    TYPE_FIELD_NUMBER: _ClassVar[int]
-    id: str
-    type: ItemType
-    def __init__(self, id: _Optional[str] = ..., type: _Optional[_Union[ItemType, str]] = ...) -> None: ...
 
 class StatusResponse(_message.Message):
     __slots__ = ("success",)

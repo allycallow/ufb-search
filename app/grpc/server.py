@@ -6,8 +6,7 @@ from google.protobuf.struct_pb2 import Struct
 from grpc_reflection.v1alpha import reflection
 
 from app.grpc import search_pb2, search_pb2_grpc
-from app.grpc.interceptors import ApiKeyInterceptor
-from app.routers.get_item import get_item_details
+from app.grpc.interceptors import ApiKeyInterceptor, PrometheusServerInterceptor
 from app.routers.queries import (
     fetch_artist_results,
     fetch_labels_results,
@@ -21,13 +20,6 @@ from app.utils.opensearch import client
 
 INDEX = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 GRPC_PORT = getenv("GRPC_PORT", "50051")
-
-TYPE_NAMES = {
-    search_pb2.ARTIST: "artists",
-    search_pb2.LABEL: "labels",
-    search_pb2.RELEASE: "releases",
-    search_pb2.TRACK: "tracks",
-}
 
 
 def _to_structs(items: list[dict]) -> list[Struct]:
@@ -88,34 +80,6 @@ class SearchServicer(search_pb2_grpc.SearchServiceServicer):
         results = await fetch_labels_results(query)
         return search_pb2.ItemListResponse(results=_to_structs(results))
 
-    async def AddItem(self, request, context):
-        logger.info("gRPC creating search item", extra={"item_id": request.id})
-        type_name = TYPE_NAMES[request.type]
-        response = get_item_details(request.id, type_name)
-
-        client.index(index=INDEX, id=request.id, body={**response, "type": type_name})
-
-        return search_pb2.StatusResponse(success=True)
-
-    async def UpdateItem(self, request, context):
-        logger.info("gRPC updating search item", extra={"item_id": request.id})
-        type_name = TYPE_NAMES[request.type]
-        response = get_item_details(request.id, type_name)
-
-        client.update(
-            index=INDEX,
-            id=request.id,
-            body={"doc": {**response, "type": type_name}, "doc_as_upsert": True},
-        )
-
-        return search_pb2.StatusResponse(success=True)
-
-    async def DeleteItem(self, request, context):
-        logger.info("gRPC deleting search item", extra={"item_id": request.id})
-        client.delete(index=INDEX, id=request.id)
-
-        return search_pb2.StatusResponse(success=True)
-
     async def CreateIndex(self, request, context):
         logger.info("gRPC creating index")
         client.indices.create(
@@ -145,7 +109,9 @@ class SearchServicer(search_pb2_grpc.SearchServiceServicer):
 
 
 async def create_grpc_server() -> grpc.aio.Server:
-    server = grpc.aio.server(interceptors=[ApiKeyInterceptor()])
+    server = grpc.aio.server(
+        interceptors=[PrometheusServerInterceptor(), ApiKeyInterceptor()]
+    )
     search_pb2_grpc.add_SearchServiceServicer_to_server(SearchServicer(), server)
 
     reflection.enable_server_reflection(

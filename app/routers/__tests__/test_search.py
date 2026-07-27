@@ -6,18 +6,6 @@ from fastapi.testclient import TestClient
 from app.auth import verify_api_key
 from app.main import app
 
-VALID_EVENT = {
-    "version": "0",
-    "id": "abc123",
-    "detail-type": "artist.created",
-    "source": "upfrontbeats",
-    "account": "123456789",
-    "time": "2024-01-01T00:00:00Z",
-    "region": "eu-west-2",
-    "resources": [],
-    "detail": {"id": "item-123"},
-}
-
 
 @pytest.fixture
 def client():
@@ -177,100 +165,6 @@ class TestSearchLabels:
 
     def test_search_labels_missing_query_param_returns_422(self, client):
         response = client.get("/api/search/labels")
-        assert response.status_code == 422
-
-
-class TestAddItem:
-    @patch("app.routers.search.get_item_details")
-    @patch("app.routers.search.client")
-    def test_add_item_indexes_document(self, mock_os_client, mock_get_item, client):
-        mock_get_item.return_value = {"name": "Test Artist"}
-
-        response = client.post("/api/search/add", json=VALID_EVENT)
-
-        assert response.status_code == 200
-        assert response.json() == {"success": True}
-        mock_os_client.index.assert_called_once()
-
-    @patch("app.routers.search.get_item_details")
-    @patch("app.routers.search.client")
-    def test_add_item_uses_correct_type(self, mock_os_client, mock_get_item, client):
-        mock_get_item.return_value = {"name": "Test Artist"}
-
-        client.post("/api/search/add", json=VALID_EVENT)
-
-        call_kwargs = mock_os_client.index.call_args
-        assert call_kwargs.kwargs["body"]["type"] == "artists"
-
-    @patch("app.routers.search.get_item_details")
-    @patch("app.routers.search.client")
-    def test_add_item_each_type(self, mock_os_client, mock_get_item, client):
-        mock_get_item.return_value = {"name": "Test"}
-        type_map = {
-            "artist.created": "artists",
-            "label.created": "labels",
-            "release.created": "releases",
-            "track.created": "tracks",
-        }
-        for detail_type, expected_type in type_map.items():
-            event = {**VALID_EVENT, "detail-type": detail_type}
-            response = client.post("/api/search/add", json=event)
-            assert response.status_code == 200
-            body = mock_os_client.index.call_args.kwargs["body"]
-            assert body["type"] == expected_type
-
-    def test_add_item_missing_body_returns_422(self, client):
-        response = client.post("/api/search/add")
-        assert response.status_code == 422
-
-
-class TestUpdateItem:
-    @patch("app.routers.search.get_item_details")
-    @patch("app.routers.search.client")
-    def test_update_item_upserts_document(self, mock_os_client, mock_get_item, client):
-        mock_get_item.return_value = {"name": "Test Artist"}
-
-        response = client.put("/api/search/update", json=VALID_EVENT)
-
-        assert response.status_code == 200
-        assert response.json() == {"success": True}
-        mock_os_client.update.assert_called_once()
-
-    @patch("app.routers.search.get_item_details")
-    @patch("app.routers.search.client")
-    def test_update_item_uses_doc_as_upsert(
-        self, mock_os_client, mock_get_item, client
-    ):
-        mock_get_item.return_value = {"name": "Test"}
-
-        client.put("/api/search/update", json=VALID_EVENT)
-
-        body = mock_os_client.update.call_args.kwargs["body"]
-        assert body["doc_as_upsert"] is True
-
-    def test_update_item_missing_body_returns_422(self, client):
-        response = client.put("/api/search/update")
-        assert response.status_code == 422
-
-
-class TestDeleteItem:
-    @patch("app.routers.search.client")
-    def test_delete_item_removes_document(self, mock_os_client, client):
-        response = client.request("DELETE", "/api/search/delete", json=VALID_EVENT)
-
-        assert response.status_code == 200
-        assert response.json() == {"success": True}
-        mock_os_client.delete.assert_called_once()
-
-    @patch("app.routers.search.client")
-    def test_delete_item_uses_correct_id(self, mock_os_client, client):
-        client.request("DELETE", "/api/search/delete", json=VALID_EVENT)
-
-        call_kwargs = mock_os_client.delete.call_args
-        assert call_kwargs.kwargs["id"] == "item-123"
-
-    def test_delete_item_missing_body_returns_422(self, client):
-        response = client.request("DELETE", "/api/search/delete")
         assert response.status_code == 422
 
 

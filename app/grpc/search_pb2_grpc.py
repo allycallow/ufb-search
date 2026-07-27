@@ -49,21 +49,6 @@ class SearchServiceStub:
                 request_serializer=search__pb2.SearchRequest.SerializeToString,
                 response_deserializer=search__pb2.ItemListResponse.FromString,
                 _registered_method=True)
-        self.AddItem = channel.unary_unary(
-                '/ufb_search.SearchService/AddItem',
-                request_serializer=search__pb2.ItemEvent.SerializeToString,
-                response_deserializer=search__pb2.StatusResponse.FromString,
-                _registered_method=True)
-        self.UpdateItem = channel.unary_unary(
-                '/ufb_search.SearchService/UpdateItem',
-                request_serializer=search__pb2.ItemEvent.SerializeToString,
-                response_deserializer=search__pb2.StatusResponse.FromString,
-                _registered_method=True)
-        self.DeleteItem = channel.unary_unary(
-                '/ufb_search.SearchService/DeleteItem',
-                request_serializer=search__pb2.ItemEvent.SerializeToString,
-                response_deserializer=search__pb2.StatusResponse.FromString,
-                _registered_method=True)
         self.CreateIndex = channel.unary_unary(
                 '/ufb_search.SearchService/CreateIndex',
                 request_serializer=search__pb2.Empty.SerializeToString,
@@ -92,24 +77,6 @@ class SearchServiceServicer:
         raise NotImplementedError('Method not implemented!')
 
     def SearchLabels(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def AddItem(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def UpdateItem(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def DeleteItem(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -144,21 +111,6 @@ def add_SearchServiceServicer_to_server(servicer, server):
                     servicer.SearchLabels,
                     request_deserializer=search__pb2.SearchRequest.FromString,
                     response_serializer=search__pb2.ItemListResponse.SerializeToString,
-            ),
-            'AddItem': grpc.unary_unary_rpc_method_handler(
-                    servicer.AddItem,
-                    request_deserializer=search__pb2.ItemEvent.FromString,
-                    response_serializer=search__pb2.StatusResponse.SerializeToString,
-            ),
-            'UpdateItem': grpc.unary_unary_rpc_method_handler(
-                    servicer.UpdateItem,
-                    request_deserializer=search__pb2.ItemEvent.FromString,
-                    response_serializer=search__pb2.StatusResponse.SerializeToString,
-            ),
-            'DeleteItem': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteItem,
-                    request_deserializer=search__pb2.ItemEvent.FromString,
-                    response_serializer=search__pb2.StatusResponse.SerializeToString,
             ),
             'CreateIndex': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateIndex,
@@ -252,87 +204,6 @@ class SearchService:
             '/ufb_search.SearchService/SearchLabels',
             search__pb2.SearchRequest.SerializeToString,
             search__pb2.ItemListResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def AddItem(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/ufb_search.SearchService/AddItem',
-            search__pb2.ItemEvent.SerializeToString,
-            search__pb2.StatusResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def UpdateItem(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/ufb_search.SearchService/UpdateItem',
-            search__pb2.ItemEvent.SerializeToString,
-            search__pb2.StatusResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def DeleteItem(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/ufb_search.SearchService/DeleteItem',
-            search__pb2.ItemEvent.SerializeToString,
-            search__pb2.StatusResponse.FromString,
             options,
             channel_credentials,
             insecure,

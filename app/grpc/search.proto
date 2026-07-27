@@ -8,18 +8,8 @@ service SearchService {
   rpc Search(SearchRequest) returns (SearchResponse);
   rpc SearchArtists(SearchRequest) returns (ItemListResponse);
   rpc SearchLabels(SearchRequest) returns (ItemListResponse);
-  rpc AddItem(ItemEvent) returns (StatusResponse);
-  rpc UpdateItem(ItemEvent) returns (StatusResponse);
-  rpc DeleteItem(ItemEvent) returns (StatusResponse);
   rpc CreateIndex(Empty) returns (StatusResponse);
   rpc DeleteIndex(Empty) returns (StatusResponse);
-}
-
-enum ItemType {
-  ARTIST = 0;
-  LABEL = 1;
-  RELEASE = 2;
-  TRACK = 3;
 }
 
 message Empty {}
@@ -39,11 +29,6 @@ message SearchResponse {
 
 message ItemListResponse {
   repeated google.protobuf.Struct results = 1;
-}
-
-message ItemEvent {
-  string id = 1;
-  ItemType type = 2;
 }
 
 message StatusResponse {
