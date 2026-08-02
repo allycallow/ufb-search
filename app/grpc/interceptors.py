@@ -52,7 +52,7 @@ class PrometheusServerInterceptor(grpc.aio.ServerInterceptor):
                     grpc_method=method, grpc_code=code.name
                 ).inc()
 
-        return grpc.aio.unary_unary_rpc_method_handler(
+        return grpc.unary_unary_rpc_method_handler(
             instrumented_unary_unary,
             request_deserializer=handler.request_deserializer,
             response_serializer=handler.response_serializer,
