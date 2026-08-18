@@ -26,3 +26,15 @@ async def test_fetch_release_results_returns_empty_when_no_hits(mock_client):
     mock_client.search.return_value = {"hits": {"hits": []}}
     results = await fetch_releases_results("Unknown")
     assert results == []
+
+
+@pytest.mark.asyncio
+@patch("app.routers.queries.fetch_releases_results.client")
+async def test_fetch_release_results_filters_to_visible(mock_client):
+    mock_client.search.return_value = {"hits": {"hits": []}}
+    await fetch_releases_results("Release")
+
+    query_filter = mock_client.search.call_args.kwargs["body"]["query"]["bool"][
+        "filter"
+    ]
+    assert {"term": {"is_visible": True}} in query_filter

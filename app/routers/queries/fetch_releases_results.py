@@ -25,6 +25,11 @@ async def fetch_releases_results(query):
                                 "type": "releases",
                             },
                         },
+                        {
+                            "term": {
+                                "is_visible": True,
+                            },
+                        },
                     ],
                 },
             },

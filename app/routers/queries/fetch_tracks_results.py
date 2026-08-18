@@ -25,6 +25,11 @@ async def fetch_tracks_results(query):
                                 "type": "tracks",
                             },
                         },
+                        {
+                            "term": {
+                                "is_visible": True,
+                            },
+                        },
                     ],
                     "should": [
                         {

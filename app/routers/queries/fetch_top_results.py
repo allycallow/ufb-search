@@ -23,6 +23,29 @@ async def fetch_top_results(query):
                         {"range": {"popularity": {"gte": 0, "boost": 3}}},
                     ],
                     "minimum_should_match": 1,
+                    "filter": [
+                        {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "bool": {
+                                            "must_not": {
+                                                "terms": {
+                                                    "type": ["releases", "tracks"],
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        "term": {
+                                            "is_visible": True,
+                                        },
+                                    },
+                                ],
+                                "minimum_should_match": 1,
+                            },
+                        },
+                    ],
                 }
             },
         },
