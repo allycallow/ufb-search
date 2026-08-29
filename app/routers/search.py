@@ -136,7 +136,7 @@ async def create_index():
 async def delete_index():
     logger.info("Deleting index")
 
-    client.indices.delete_index(
+    client.indices.delete(
         index=INDEX,
     )
 
