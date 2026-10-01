@@ -168,6 +168,31 @@ class TestSearchLabels:
         assert response.status_code == 422
 
 
+class TestSearchSuggestions:
+    @patch("app.routers.search.fetch_suggestions_results", new_callable=AsyncMock)
+    def test_search_suggestions_returns_results(self, mock_suggestions, client):
+        mock_suggestions.return_value = [{"name": "Hot Creations"}]
+
+        response = client.get("/api/search/suggestions?q=hot")
+
+        assert response.status_code == 200
+        assert response.json() == {"results": [{"name": "Hot Creations"}]}
+        mock_suggestions.assert_called_once_with("hot")
+
+    @patch("app.routers.search.fetch_suggestions_results", new_callable=AsyncMock)
+    def test_search_suggestions_returns_empty_list(self, mock_suggestions, client):
+        mock_suggestions.return_value = []
+
+        response = client.get("/api/search/suggestions?q=unknown")
+
+        assert response.status_code == 200
+        assert response.json() == {"results": []}
+
+    def test_search_suggestions_missing_query_param_returns_422(self, client):
+        response = client.get("/api/search/suggestions")
+        assert response.status_code == 422
+
+
 class TestCreateIndex:
     @patch("app.routers.search.client")
     def test_create_index_succeeds(self, mock_os_client, client):

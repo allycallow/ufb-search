@@ -9,6 +9,7 @@ from app.routers.queries import (
     fetch_artist_results,
     fetch_labels_results,
     fetch_releases_results,
+    fetch_suggestions_results,
     fetch_top_results,
     fetch_tracks_results,
 )
@@ -94,6 +95,26 @@ async def search_labels(q: str = Query(..., description="Search query")):
     search_terms_total.labels(term=decode.lower().strip()).inc()
 
     results = await fetch_labels_results(decode)
+
+    return {"results": results}
+
+
+@router.get("/suggestions", description="Search suggestions", tags=["search"])
+async def search_suggestions(q: str = Query(..., description="Search query")):
+    logger.info("Suggestions query received", extra={"query": q})
+
+    if not q:
+        logger.warning("Empty search query received")
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail="Query parameter 'q' is required"
+        )
+
+    decode = q.encode("utf-8").decode("unicode_escape")
+
+    search_queries_total.labels(endpoint="suggestions").inc()
+    search_terms_total.labels(term=decode.lower().strip()).inc()
+
+    results = await fetch_suggestions_results(decode)
 
     return {"results": results}
 
