@@ -5,7 +5,9 @@ from app.utils import client
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 
 
-async def fetch_suggestions_results(query: str) -> list[dict[str, str | int | bool | None]]:
+async def fetch_suggestions_results(
+    query: str,
+) -> list[dict[str, str | int | bool | None]]:
     response = client.search(
         index=INDEX_NAME,
         body={
