@@ -210,4 +210,4 @@ class TestDeleteIndex:
 
         assert response.status_code == 200
         assert response.json() == {"success": True}
-        mock_os_client.indices.delete_index.assert_called_once()
+        mock_os_client.indices.delete.assert_called_once()
