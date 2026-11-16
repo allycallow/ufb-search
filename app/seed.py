@@ -4,6 +4,7 @@ from os import getenv
 from opensearchpy.exceptions import TransportError
 
 from app.utils import client, logger
+from app.utils.index_mappings import INDEX_PROPERTIES
 
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 
@@ -20,6 +21,18 @@ SEED_DOCUMENTS: list[dict[str, str | int | None]] = [
         "background_image": None,
         "type": "labels",
         "popularity": 50,
+    },
+    {
+        "id": "5b1f0d2e-7c0a-4b64-9d3e-2f8a1c6e9a10",
+        "name": "Late Night House",
+        "sub_title": "After hours",
+        "description": "Deep and warm house for the small hours.",
+        "private": False,
+        "colour": "#1a1a2e",
+        "artwork_url": None,
+        "hero_image_url": None,
+        "created_by_id": None,
+        "type": "playlists",
     },
 ]
 
@@ -54,9 +67,7 @@ def seed() -> None:
                     },
                 },
                 "mappings": {
-                    "properties": {
-                        "popularity": {"type": "integer"},
-                    },
+                    "properties": INDEX_PROPERTIES,
                 },
             },
         )

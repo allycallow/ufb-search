@@ -30,6 +30,16 @@ async def test_fetch_top_results_returns_empty_when_no_hits(mock_client):
 
 @pytest.mark.asyncio
 @patch("app.routers.queries.fetch_top_results.client")
+async def test_fetch_top_results_boosts_playlists(mock_client):
+    mock_client.search.return_value = {"hits": {"hits": []}}
+    await fetch_top_results("query")
+
+    should = mock_client.search.call_args.kwargs["body"]["query"]["bool"]["should"]
+    assert {"match": {"type": {"query": "playlists", "boost": 1}}} in should
+
+
+@pytest.mark.asyncio
+@patch("app.routers.queries.fetch_top_results.client")
 async def test_fetch_top_results_excludes_unpublished_and_unready(mock_client):
     mock_client.search.return_value = {"hits": {"hits": []}}
     await fetch_top_results("query")

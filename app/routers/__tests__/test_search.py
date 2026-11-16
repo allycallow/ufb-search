@@ -58,12 +58,16 @@ class TestAuth:
             patch(
                 "app.routers.search.fetch_tracks_results", new_callable=AsyncMock
             ) as mock_tracks,
+            patch(
+                "app.routers.search.fetch_playlist_results", new_callable=AsyncMock
+            ) as mock_playlists,
         ):
             mock_top.return_value = []
             mock_artists.return_value = []
             mock_labels.return_value = []
             mock_releases.return_value = []
             mock_tracks.return_value = []
+            mock_playlists.return_value = []
             response = unauthenticated_client.get(
                 "/api/search/?q=test", headers={"X-API-Key": "valid-key"}
             )
@@ -76,14 +80,23 @@ class TestSearch:
     @patch("app.routers.search.fetch_labels_results", new_callable=AsyncMock)
     @patch("app.routers.search.fetch_releases_results", new_callable=AsyncMock)
     @patch("app.routers.search.fetch_tracks_results", new_callable=AsyncMock)
+    @patch("app.routers.search.fetch_playlist_results", new_callable=AsyncMock)
     def test_search_returns_all_result_groups(
-        self, mock_tracks, mock_releases, mock_labels, mock_artists, mock_top, client
+        self,
+        mock_playlists,
+        mock_tracks,
+        mock_releases,
+        mock_labels,
+        mock_artists,
+        mock_top,
+        client,
     ):
         mock_top.return_value = [{"name": "Top"}]
         mock_artists.return_value = [{"name": "Artist1"}]
         mock_labels.return_value = [{"name": "Label1"}]
         mock_releases.return_value = [{"name": "Release1"}]
         mock_tracks.return_value = [{"name": "Track1"}]
+        mock_playlists.return_value = [{"name": "Playlist1"}]
 
         response = client.get("/api/search/?q=test")
 
@@ -94,7 +107,7 @@ class TestSearch:
         assert data["results"]["labels"] == [{"name": "Label1"}]
         assert data["results"]["releases"] == [{"name": "Release1"}]
         assert data["results"]["tracks"] == [{"name": "Track1"}]
-        assert data["results"]["playlists"] == []
+        assert data["results"]["playlists"] == [{"name": "Playlist1"}]
 
     def test_search_missing_query_param_returns_422(self, client):
         response = client.get("/api/search/")
@@ -105,10 +118,25 @@ class TestSearch:
     @patch("app.routers.search.fetch_labels_results", new_callable=AsyncMock)
     @patch("app.routers.search.fetch_releases_results", new_callable=AsyncMock)
     @patch("app.routers.search.fetch_tracks_results", new_callable=AsyncMock)
+    @patch("app.routers.search.fetch_playlist_results", new_callable=AsyncMock)
     def test_search_calls_all_fetch_functions(
-        self, mock_tracks, mock_releases, mock_labels, mock_artists, mock_top, client
+        self,
+        mock_playlists,
+        mock_tracks,
+        mock_releases,
+        mock_labels,
+        mock_artists,
+        mock_top,
+        client,
     ):
-        for m in [mock_top, mock_artists, mock_labels, mock_releases, mock_tracks]:
+        for m in [
+            mock_top,
+            mock_artists,
+            mock_labels,
+            mock_releases,
+            mock_tracks,
+            mock_playlists,
+        ]:
             m.return_value = []
 
         client.get("/api/search/?q=jazz")
@@ -118,6 +146,7 @@ class TestSearch:
         mock_labels.assert_called_once_with("jazz")
         mock_releases.assert_called_once_with("jazz")
         mock_tracks.assert_called_once_with("jazz")
+        mock_playlists.assert_called_once_with("jazz")
 
 
 class TestSearchArtists:
@@ -168,6 +197,31 @@ class TestSearchLabels:
         assert response.status_code == 422
 
 
+class TestSearchPlaylists:
+    @patch("app.routers.search.fetch_playlist_results", new_callable=AsyncMock)
+    def test_search_playlists_returns_results(self, mock_playlists, client):
+        mock_playlists.return_value = [{"name": "Playlist1"}]
+
+        response = client.get("/api/search/playlists?q=playlist")
+
+        assert response.status_code == 200
+        assert response.json() == {"results": [{"name": "Playlist1"}]}
+        mock_playlists.assert_called_once_with("playlist")
+
+    @patch("app.routers.search.fetch_playlist_results", new_callable=AsyncMock)
+    def test_search_playlists_returns_empty_list(self, mock_playlists, client):
+        mock_playlists.return_value = []
+
+        response = client.get("/api/search/playlists?q=unknown")
+
+        assert response.status_code == 200
+        assert response.json() == {"results": []}
+
+    def test_search_playlists_missing_query_param_returns_422(self, client):
+        response = client.get("/api/search/playlists")
+        assert response.status_code == 422
+
+
 class TestSearchSuggestions:
     @patch("app.routers.search.fetch_suggestions_results", new_callable=AsyncMock)
     def test_search_suggestions_returns_results(self, mock_suggestions, client):
@@ -201,6 +255,17 @@ class TestCreateIndex:
         assert response.status_code == 200
         assert response.json() == {"success": True}
         mock_os_client.indices.create.assert_called_once()
+
+    @patch("app.routers.search.client")
+    def test_create_index_includes_playlist_mapping(self, mock_os_client, client):
+        client.post("/api/search/create-index")
+
+        properties = mock_os_client.indices.create.call_args.kwargs["body"]["mappings"][
+            "properties"
+        ]
+        assert properties["popularity"] == {"type": "integer"}
+        assert properties["description"] == {"type": "text", "index": False}
+        assert properties["id"] == {"type": "keyword"}
 
 
 class TestDeleteIndex:

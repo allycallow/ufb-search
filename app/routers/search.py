@@ -8,12 +8,14 @@ from app.auth import verify_api_key
 from app.routers.queries import (
     fetch_artist_results,
     fetch_labels_results,
+    fetch_playlist_results,
     fetch_releases_results,
     fetch_suggestions_results,
     fetch_top_results,
     fetch_tracks_results,
 )
 from app.utils import logger
+from app.utils.index_mappings import INDEX_PROPERTIES
 from app.utils.metrics import search_queries_total, search_terms_total
 from app.utils.opensearch import client
 
@@ -37,14 +39,20 @@ async def search(q: str = Query(..., description="Search query")):
     search_queries_total.labels(endpoint="general").inc()
     search_terms_total.labels(term=decode.lower().strip()).inc()
 
-    top_results, artist_results, labels_results, releases_results, tracks_results = (
-        await asyncio.gather(
-            fetch_top_results(decode),
-            fetch_artist_results(decode),
-            fetch_labels_results(decode),
-            fetch_releases_results(decode),
-            fetch_tracks_results(decode),
-        )
+    (
+        top_results,
+        artist_results,
+        labels_results,
+        releases_results,
+        tracks_results,
+        playlist_results,
+    ) = await asyncio.gather(
+        fetch_top_results(decode),
+        fetch_artist_results(decode),
+        fetch_labels_results(decode),
+        fetch_releases_results(decode),
+        fetch_tracks_results(decode),
+        fetch_playlist_results(decode),
     )
 
     return {
@@ -54,7 +62,7 @@ async def search(q: str = Query(..., description="Search query")):
             "labels": labels_results,
             "releases": releases_results,
             "tracks": tracks_results,
-            "playlists": [],
+            "playlists": playlist_results,
         }
     }
 
@@ -99,6 +107,26 @@ async def search_labels(q: str = Query(..., description="Search query")):
     return {"results": results}
 
 
+@router.get("/playlists", description="Search playlists", tags=["search"])
+async def search_playlists(q: str = Query(..., description="Search query")):
+    logger.info("Playlist search query received", extra={"query": q})
+
+    if not q:
+        logger.warning("Empty search query received")
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail="Query parameter 'q' is required"
+        )
+
+    decode = q.encode("utf-8").decode("unicode_escape")
+
+    search_queries_total.labels(endpoint="playlists").inc()
+    search_terms_total.labels(term=decode.lower().strip()).inc()
+
+    results = await fetch_playlist_results(decode)
+
+    return {"results": results}
+
+
 @router.get("/suggestions", description="Search suggestions", tags=["search"])
 async def search_suggestions(q: str = Query(..., description="Search query")):
     logger.info("Suggestions query received", extra={"query": q})
@@ -137,9 +165,7 @@ async def create_index():
                 },
             },
             "mappings": {
-                "properties": {
-                    "popularity": {"type": "integer"},
-                },
+                "properties": INDEX_PROPERTIES,
             },
         },
     )
