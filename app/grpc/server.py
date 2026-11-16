@@ -10,11 +10,13 @@ from app.grpc.interceptors import ApiKeyInterceptor, PrometheusServerInterceptor
 from app.routers.queries import (
     fetch_artist_results,
     fetch_labels_results,
+    fetch_playlist_results,
     fetch_releases_results,
     fetch_top_results,
     fetch_tracks_results,
 )
 from app.utils import logger
+from app.utils.index_mappings import INDEX_PROPERTIES
 from app.utils.metrics import search_queries_total, search_terms_total
 from app.utils.opensearch import client
 
@@ -43,12 +45,13 @@ class SearchServicer(search_pb2_grpc.SearchServiceServicer):
         search_queries_total.labels(endpoint="general").inc()
         search_terms_total.labels(term=query.lower().strip()).inc()
 
-        top, artists, labels, releases, tracks = await asyncio.gather(
+        top, artists, labels, releases, tracks, playlists = await asyncio.gather(
             fetch_top_results(query),
             fetch_artist_results(query),
             fetch_labels_results(query),
             fetch_releases_results(query),
             fetch_tracks_results(query),
+            fetch_playlist_results(query),
         )
 
         return search_pb2.SearchResponse(
@@ -57,7 +60,7 @@ class SearchServicer(search_pb2_grpc.SearchServiceServicer):
             labels=_to_structs(labels),
             releases=_to_structs(releases),
             tracks=_to_structs(tracks),
-            playlists=[],
+            playlists=_to_structs(playlists),
         )
 
     async def SearchArtists(self, request, context):
@@ -92,9 +95,7 @@ class SearchServicer(search_pb2_grpc.SearchServiceServicer):
                     },
                 },
                 "mappings": {
-                    "properties": {
-                        "popularity": {"type": "integer"},
-                    },
+                    "properties": INDEX_PROPERTIES,
                 },
             },
         )
