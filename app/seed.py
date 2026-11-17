@@ -8,7 +8,7 @@ from app.utils.index_mappings import INDEX_PROPERTIES
 
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 
-SEED_DOCUMENTS: list[dict[str, str | int | None]] = [
+SEED_DOCUMENTS: list[dict[str, object]] = [
     {
         "id": "87ffaaec-3042-43c7-9890-5cf845aaf40c",
         "created_at": "2023-12-15T18:08:57.211246Z",
@@ -21,6 +21,71 @@ SEED_DOCUMENTS: list[dict[str, str | int | None]] = [
         "background_image": None,
         "type": "labels",
         "popularity": 50,
+    },
+    {
+        "id": "a1000000-0000-4000-8000-000000000001",
+        "name": "Hot Since 82",
+        "slug": "hot-since-82",
+        "type": "artists",
+        "popularity": 90,
+    },
+    {
+        "id": "a1000000-0000-4000-8000-000000000002",
+        "name": "Hot Natured",
+        "slug": "hot-natured",
+        "type": "artists",
+        "popularity": 60,
+    },
+    {
+        "id": "a1000000-0000-4000-8000-000000000003",
+        "name": "Ronnie Spiteri",
+        "slug": "ronnie-spiteri",
+        "type": "artists",
+        "popularity": 40,
+    },
+    {
+        "id": "b1000000-0000-4000-8000-000000000001",
+        "title": "Double Up",
+        "slug": "double-up",
+        "type": "releases",
+        "release_date": "2024-05-03",
+        "is_visible": True,
+        "label": {
+            "id": "87ffaaec-3042-43c7-9890-5cf845aaf40c",
+            "name": "Hot Creations",
+        },
+        "artists": [
+            {"id": "a1000000-0000-4000-8000-000000000003", "name": "Ronnie Spiteri"}
+        ],
+    },
+    {
+        "id": "b1000000-0000-4000-8000-000000000002",
+        "title": "Bappi",
+        "slug": "bappi",
+        "type": "releases",
+        "release_date": "2023-09-15",
+        "is_visible": True,
+        "label": {
+            "id": "87ffaaec-3042-43c7-9890-5cf845aaf40c",
+            "name": "Hot Creations",
+        },
+        "artists": [],
+    },
+    {
+        "id": "c1000000-0000-4000-8000-000000000001",
+        "title": "Double Up",
+        "slug": "double-up-track",
+        "type": "tracks",
+        "popularity": 70,
+        "is_visible": True,
+        "label": {
+            "id": "87ffaaec-3042-43c7-9890-5cf845aaf40c",
+            "name": "Hot Creations",
+        },
+        "release": {"id": "b1000000-0000-4000-8000-000000000001", "title": "Double Up"},
+        "artists": [
+            {"id": "a1000000-0000-4000-8000-000000000003", "name": "Ronnie Spiteri"}
+        ],
     },
     {
         "id": "5b1f0d2e-7c0a-4b64-9d3e-2f8a1c6e9a10",
