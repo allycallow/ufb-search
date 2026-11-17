@@ -18,6 +18,12 @@ search_zero_results_total = Counter(
     ["endpoint"],
 )
 
+search_lead_expansions_total = Counter(
+    "ufb_search_lead_expansions_total",
+    "Total top searches that returned a label or artist with its releases and tracks",
+    ["lead_type"],
+)
+
 grpc_requests_total = Counter(
     "ufb_search_grpc_requests_total",
     "Total number of gRPC requests handled, by method and status code",
