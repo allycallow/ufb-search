@@ -3,6 +3,7 @@
 **Author:** Alex Callow
 **Date:** 2026-11-16
 **Mode:** Brainstorm
+**Status:** Decisions in this brief were settled and built. See [top-results-search-relevance-design.md](top-results-search-relevance-design.md) for what shipped and what is still open.
 **Reviewer status:** all seven lenses completed (design, codebase-details, zoom-out, comprehension, implementation-readiness, structural, inventive-catalyst). None are `not run`.
 
 ## Overview
