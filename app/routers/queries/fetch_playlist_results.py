@@ -1,5 +1,6 @@
 from os import getenv
 
+from app.routers.queries.name_match import name_match_query
 from app.utils import client
 
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
@@ -12,14 +13,7 @@ async def fetch_playlist_results(query: str) -> list[dict[str, object]]:
             "size": 8,
             "query": {
                 "bool": {
-                    "must": [
-                        {
-                            "query_string": {
-                                "query": f"*{query}*",
-                                "fields": ["name"],
-                            },
-                        },
-                    ],
+                    "must": [name_match_query(query, fields=["name"])],
                     "filter": [
                         {
                             "term": {

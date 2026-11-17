@@ -38,5 +38,23 @@ async def test_fetch_playlist_results_filters_type_and_matches_name_only(mock_cl
     assert body["size"] == 8
     assert body["query"]["bool"]["filter"] == [{"term": {"type": "playlists"}}]
     assert body["query"]["bool"]["must"] == [
-        {"query_string": {"query": "*late night*", "fields": ["name"]}}
+        {
+            "bool": {
+                "must": [
+                    {
+                        "multi_match": {
+                            "query": "late",
+                            "fields": ["name"],
+                            "operator": "and",
+                        }
+                    },
+                    {
+                        "bool": {
+                            "should": [{"prefix": {"name": {"value": "night"}}}],
+                            "minimum_should_match": 1,
+                        }
+                    },
+                ]
+            }
+        }
     ]

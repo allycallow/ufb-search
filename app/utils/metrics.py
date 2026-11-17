@@ -12,6 +12,12 @@ search_terms_total = Counter(
     ["term"],
 )
 
+search_zero_results_total = Counter(
+    "ufb_search_zero_results_total",
+    "Total search requests that returned no results",
+    ["endpoint"],
+)
+
 grpc_requests_total = Counter(
     "ufb_search_grpc_requests_total",
     "Total number of gRPC requests handled, by method and status code",
