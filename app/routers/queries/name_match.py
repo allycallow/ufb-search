@@ -4,6 +4,10 @@ from collections.abc import Sequence
 # playlists with `name`. A field missing from a document simply does not match.
 SEARCH_FIELDS: tuple[str, ...] = ("name", "title")
 
+# Callers only need these to find the matching rows, so internal fields stored
+# on a document are never returned.
+RESULT_FIELDS: list[str] = ["id", "type", "name", "title"]
+
 
 def name_match_query(
     query: str, fields: Sequence[str] = SEARCH_FIELDS

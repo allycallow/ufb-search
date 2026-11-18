@@ -248,3 +248,52 @@ async def test_an_msearch_item_error_is_treated_as_a_failed_lookup(
 
     assert results == [LABEL]
     mock_sentry.capture_exception.assert_called_once()
+
+
+@pytest.mark.asyncio
+@patch("app.routers.queries.fetch_top_results.client")
+@pytest.mark.parametrize("query", ["Rossi", "rossi", "Rossi.", " ROSSI "])
+async def test_punctuation_in_a_name_does_not_stop_it_leading(mock_client, query):
+    rossi = {"id": "A2", "type": "artists", "name": "Rossi."}
+    mock_client.search.return_value = _search_hits(rossi)
+    mock_client.msearch.return_value = _children([_release(1)], [_track(1)])
+
+    results = await fetch_top_results(query)
+
+    assert results == [rossi, _release(1), _track(1)]
+
+
+@pytest.mark.asyncio
+@patch("app.routers.queries.fetch_top_results.client")
+@pytest.mark.parametrize(
+    ("query", "name"),
+    [
+        ("Rossi", "Rossi Jr"),
+        ("Adam", "A.D.A.M."),
+        ("Rekids", "Re Kids"),
+        ("!!!", "!!!"),
+    ],
+)
+async def test_a_name_with_different_words_does_not_lead(mock_client, query, name):
+    artist = {"id": "A3", "type": "artists", "name": name}
+    mock_client.search.return_value = _search_hits(artist)
+
+    results = await fetch_top_results(query)
+
+    assert results == [artist]
+    mock_client.msearch.assert_not_called()
+
+
+@pytest.mark.asyncio
+@patch("app.routers.queries.fetch_top_results.client")
+async def test_an_exact_name_leads_over_one_that_differs_only_by_punctuation(
+    mock_client,
+):
+    dotted = {"id": "A4", "type": "artists", "name": "Rossi."}
+    exact = {"id": "A5", "type": "artists", "name": "Rossi"}
+    mock_client.search.return_value = _search_hits(dotted, exact)
+    mock_client.msearch.return_value = _children([], [])
+
+    results = await fetch_top_results("Rossi")
+
+    assert results[0] == exact

@@ -247,32 +247,29 @@ class TestSearchSuggestions:
         assert response.status_code == 422
 
 
-class TestCreateIndex:
-    @patch("app.routers.search.client")
-    def test_create_index_succeeds(self, mock_os_client, client):
-        response = client.post("/api/search/create-index")
+class TestQueryDecoding:
+    @patch("app.routers.search.fetch_artist_results", new_callable=AsyncMock)
+    def test_accented_query_reaches_search_unchanged(self, mock_artists, client):
+        mock_artists.return_value = []
+
+        response = client.get("/api/search/artists", params={"q": "Âme"})
 
         assert response.status_code == 200
-        assert response.json() == {"success": True}
-        mock_os_client.indices.create.assert_called_once()
+        mock_artists.assert_called_once_with("Âme")
 
-    @patch("app.routers.search.client")
-    def test_create_index_includes_playlist_mapping(self, mock_os_client, client):
-        client.post("/api/search/create-index")
+    @patch("app.routers.search.fetch_artist_results", new_callable=AsyncMock)
+    def test_query_with_a_backslash_does_not_fail(self, mock_artists, client):
+        mock_artists.return_value = []
 
-        properties = mock_os_client.indices.create.call_args.kwargs["body"]["mappings"][
-            "properties"
-        ]
-        assert properties["popularity"] == {"type": "integer"}
-        assert properties["description"] == {"type": "text", "index": False}
-        assert properties["id"] == {"type": "keyword"}
-
-
-class TestDeleteIndex:
-    @patch("app.routers.search.client")
-    def test_delete_index_succeeds(self, mock_os_client, client):
-        response = client.post("/api/search/delete-index")
+        response = client.get("/api/search/artists", params={"q": "AC\\x"})
 
         assert response.status_code == 200
-        assert response.json() == {"success": True}
-        mock_os_client.indices.delete.assert_called_once()
+        mock_artists.assert_called_once_with("AC\\x")
+
+
+class TestIndexEndpointsRemoved:
+    @pytest.mark.parametrize("path", ["create-index", "delete-index"])
+    def test_index_endpoints_do_not_exist(self, path, client):
+        response = client.post(f"/api/search/{path}")
+
+        assert response.status_code in (404, 405)

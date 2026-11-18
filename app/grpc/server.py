@@ -16,11 +16,8 @@ from app.routers.queries import (
     fetch_tracks_results,
 )
 from app.utils import logger
-from app.utils.index_mappings import INDEX_PROPERTIES
-from app.utils.metrics import search_queries_total, search_terms_total
-from app.utils.opensearch import client
+from app.utils.metrics import search_queries_total
 
-INDEX = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 GRPC_PORT = getenv("GRPC_PORT", "50051")
 
 
@@ -33,17 +30,12 @@ def _to_structs(items: list[dict]) -> list[Struct]:
     return structs
 
 
-def _decode_query(query: str) -> str:
-    return query.encode("utf-8").decode("unicode_escape")
-
-
 class SearchServicer(search_pb2_grpc.SearchServiceServicer):
     async def Search(self, request, context):
-        query = _decode_query(request.query)
+        query = request.query
         logger.info("gRPC search query received", extra={"query": query})
 
         search_queries_total.labels(endpoint="general").inc()
-        search_terms_total.labels(term=query.lower().strip()).inc()
 
         top, artists, labels, releases, tracks, playlists = await asyncio.gather(
             fetch_top_results(query),
@@ -64,49 +56,22 @@ class SearchServicer(search_pb2_grpc.SearchServiceServicer):
         )
 
     async def SearchArtists(self, request, context):
-        query = _decode_query(request.query)
+        query = request.query
         logger.info("gRPC artist search query received", extra={"query": query})
 
         search_queries_total.labels(endpoint="artists").inc()
-        search_terms_total.labels(term=query.lower().strip()).inc()
 
         results = await fetch_artist_results(query)
         return search_pb2.ItemListResponse(results=_to_structs(results))
 
     async def SearchLabels(self, request, context):
-        query = _decode_query(request.query)
+        query = request.query
         logger.info("gRPC label search query received", extra={"query": query})
 
         search_queries_total.labels(endpoint="labels").inc()
-        search_terms_total.labels(term=query.lower().strip()).inc()
 
         results = await fetch_labels_results(query)
         return search_pb2.ItemListResponse(results=_to_structs(results))
-
-    async def CreateIndex(self, request, context):
-        logger.info("gRPC creating index")
-        client.indices.create(
-            index=INDEX,
-            body={
-                "settings": {
-                    "index": {
-                        "number_of_shards": 1,
-                        "number_of_replicas": 0,
-                    },
-                },
-                "mappings": {
-                    "properties": INDEX_PROPERTIES,
-                },
-            },
-        )
-
-        return search_pb2.StatusResponse(success=True)
-
-    async def DeleteIndex(self, request, context):
-        logger.info("gRPC deleting index")
-        client.indices.delete_index(index=INDEX)
-
-        return search_pb2.StatusResponse(success=True)
 
 
 async def create_grpc_server() -> grpc.aio.Server:

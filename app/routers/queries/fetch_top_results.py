@@ -1,8 +1,13 @@
+import re
 from os import getenv
 
 import sentry_sdk
 
-from app.routers.queries.name_match import name_match_query, visible_filter
+from app.routers.queries.name_match import (
+    RESULT_FIELDS,
+    name_match_query,
+    visible_filter,
+)
 from app.utils import client, logger
 from app.utils.metrics import search_lead_expansions_total, search_zero_results_total
 
@@ -31,6 +36,7 @@ async def fetch_top_results(query: str) -> list[dict[str, object]]:
     response = client.search(
         index=INDEX_NAME,
         body={
+            "_source": RESULT_FIELDS,
             "size": TOP_SIZE,
             "query": {
                 "function_score": {
@@ -97,20 +103,44 @@ def _normalise(text: str) -> str:
     return " ".join(text.split()).casefold()
 
 
+def _words(text: str) -> list[str]:
+    """Punctuation separates words, so "Rossi." is ["rossi"] but "A.D.A.M." is
+    ["a", "d", "a", "m"], not ["adam"]."""
+    return re.findall(r"\w+", text.casefold())
+
+
 def _find_lead(hits: list[dict[str, object]], query: str) -> dict[str, object] | None:
-    """The label or artist whose full name equals the query, if there is one."""
-    wanted = _normalise(query)
+    """The label or artist whose name has the same words as the query, if any.
+
+    A name equal to the query as typed beats one that differs only by
+    punctuation, then an artist beats a label.
+    """
+    wanted = _words(query)
+    if not wanted:
+        return None
     candidates = [
         hit
         for hit in hits
         if hit.get("type") in LEAD_TYPE_PRIORITY
         and hit.get("id")
         and isinstance(hit.get("name"), str)
-        and _normalise(str(hit["name"])) == wanted
+        and _words(str(hit["name"])) == wanted
     ]
     if not candidates:
         return None
-    return min(candidates, key=lambda hit: LEAD_TYPE_PRIORITY.index(str(hit["type"])))
+    lead = min(
+        candidates,
+        key=lambda hit: (
+            _normalise(str(hit["name"])) != _normalise(query),
+            LEAD_TYPE_PRIORITY.index(str(hit["type"])),
+        ),
+    )
+    if _normalise(str(lead["name"])) != _normalise(query):
+        logger.info(
+            "Top search chose a lead that differs from the query by punctuation",
+            extra={"query": query, "lead_id": lead["id"], "lead_name": lead["name"]},
+        )
+    return lead
 
 
 def _child_search(
@@ -121,6 +151,7 @@ def _child_search(
     sort: list[dict[str, object]],
 ) -> dict[str, object]:
     return {
+        "_source": RESULT_FIELDS,
         "size": size,
         "query": {
             "bool": {

@@ -6,12 +6,6 @@ search_queries_total = Counter(
     ["endpoint"],
 )
 
-search_terms_total = Counter(
-    "ufb_search_terms_total",
-    "Total searches by query term (high cardinality — use for top-N analysis only)",
-    ["term"],
-)
-
 search_zero_results_total = Counter(
     "ufb_search_zero_results_total",
     "Total search requests that returned no results",
