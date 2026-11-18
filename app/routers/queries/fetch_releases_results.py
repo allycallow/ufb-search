@@ -1,3 +1,4 @@
+import asyncio
 from os import getenv
 
 from app.routers.queries.name_match import RESULT_FIELDS, name_match_query
@@ -7,7 +8,8 @@ INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
 
 
 async def fetch_releases_results(query: str) -> list[dict[str, object]]:
-    response = client.search(
+    response = await asyncio.to_thread(
+        client.search,
         index=INDEX_NAME,
         body={
             "_source": RESULT_FIELDS,
