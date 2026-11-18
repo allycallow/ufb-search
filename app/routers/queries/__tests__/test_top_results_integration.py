@@ -192,7 +192,7 @@ async def test_results_never_exceed_eight(index_name: str) -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("query", ["Rossi", "rossi"])
+@pytest.mark.parametrize("query", ["Rossi", "rossi", "Rossi."])
 async def test_a_name_ending_in_punctuation_leads_with_its_releases_and_tracks(
     index_name: str, query: str
 ) -> None:

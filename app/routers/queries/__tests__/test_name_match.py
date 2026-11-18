@@ -51,6 +51,35 @@ def test_an_empty_query_matches_nothing() -> None:
     assert name_match_query("   ") == {"match_none": {}}
 
 
+def test_punctuation_around_the_last_word_is_not_part_of_the_prefix() -> None:
+    assert name_match_query("Rossi.") == name_match_query("Rossi")
+    assert name_match_query("(Rossi)") == name_match_query("Rossi")
+    assert name_match_query("Hot Creations!") == name_match_query("Hot Creations")
+
+
+def test_punctuation_inside_the_last_word_is_kept() -> None:
+    should = name_match_query("don't")["bool"]["must"][0]["bool"]["should"]  # type: ignore[index]
+
+    assert {"prefix": {"name": {"value": "don't"}}} in should
+
+
+def test_a_last_word_of_only_punctuation_is_dropped() -> None:
+    assert name_match_query("Hot Creations &") == {
+        "bool": {
+            "must": [
+                {
+                    "multi_match": {
+                        "query": "Hot Creations",
+                        "fields": ["name", "title"],
+                        "operator": "and",
+                    }
+                }
+            ]
+        }
+    }
+    assert name_match_query("&") == {"match_none": {}}
+
+
 def test_fields_can_be_limited() -> None:
     query = name_match_query("late night", fields=["name"])
 

@@ -1,3 +1,4 @@
+import re
 from collections.abc import Sequence
 
 # Releases and tracks are sent by the backend with `title`; labels, artists and
@@ -21,6 +22,26 @@ def name_match_query(
         return {"match_none": {}}
 
     *whole_words, last_word = words
+    # The prefix is not analysed, so punctuation the analyzer drops ("Rossi.")
+    # would match nothing. Punctuation inside a word ("don't") is kept.
+    last_word = re.sub(r"^\W+|\W+$", "", last_word)
+    if not last_word:
+        if not whole_words:
+            return {"match_none": {}}
+        return {
+            "bool": {
+                "must": [
+                    {
+                        "multi_match": {
+                            "query": " ".join(whole_words),
+                            "fields": list(fields),
+                            "operator": "and",
+                        }
+                    }
+                ]
+            }
+        }
+
     must: list[dict[str, object]] = []
     if whole_words:
         must.append(
