@@ -28,6 +28,7 @@ pytestmark = pytest.mark.skipif(
 HOT_CREATIONS = {"id": "label-hc", "name": "Hot Creations"}
 FUSION_LABEL = {"id": "label-fusion", "name": "Fusion"}
 FUSION_ARTIST = {"id": "artist-fusion", "name": "Fusion"}
+ROSSI = {"id": "artist-rossi", "name": "Rossi."}
 
 
 def _release(
@@ -68,6 +69,24 @@ DOCUMENTS: list[dict[str, object]] = [
     _release("r-hidden", "Hidden", "2025-01-01", HOT_CREATIONS, visible=False),
     _release("r-other", "Elsewhere", "2025-02-01", {"id": "label-x", "name": "X"}),
     _track("t-anthem", "Hot Creations Anthem", 5, HOT_CREATIONS),
+    {"type": "artists", "popularity": 30, **ROSSI},
+    {"id": "artist-rossi-jr", "type": "artists", "name": "Rossi Jr", "popularity": 90},
+    {
+        "id": "r-floor",
+        "type": "releases",
+        "title": "Get On The Floor EP",
+        "release_date": "2026-10-01",
+        "is_visible": True,
+        "artists": [ROSSI],
+    },
+    {
+        "id": "t-floor",
+        "type": "tracks",
+        "title": "Get On The Floor",
+        "popularity": 3,
+        "is_visible": True,
+        "artists": [ROSSI],
+    },
     {"type": "labels", "popularity": 10, **FUSION_LABEL},
     {"type": "artists", "popularity": 20, **FUSION_ARTIST},
     *[
@@ -170,3 +189,18 @@ async def test_same_name_artist_leads_with_three_releases_and_four_tracks(
 async def test_results_never_exceed_eight(index_name: str) -> None:
     for query in ["Hot", "Fusion", "Hot Creations", "e"]:
         assert len(await fetch_top_results(query)) <= 8
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("query", ["Rossi", "rossi"])
+async def test_a_name_ending_in_punctuation_leads_with_its_releases_and_tracks(
+    index_name: str, query: str
+) -> None:
+    results = await fetch_top_results(query)
+
+    assert _labels(results) == [
+        "Rossi.",
+        "Get On The Floor EP",
+        "Get On The Floor",
+        "Rossi Jr",
+    ]

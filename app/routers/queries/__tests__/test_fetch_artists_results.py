@@ -26,3 +26,14 @@ async def test_fetch_artist_results_returns_empty_when_no_hits(mock_client):
     mock_client.search.return_value = {"hits": {"hits": []}}
     results = await fetch_artist_results("Unknown")
     assert results == []
+
+
+@pytest.mark.asyncio
+@patch("app.routers.queries.fetch_artist_results.client")
+async def test_fetch_artist_results_only_returns_artists(mock_client):
+    mock_client.search.return_value = {"hits": {"hits": []}}
+    await fetch_artist_results("Artist")
+
+    query = mock_client.search.call_args.kwargs["body"]["query"]["bool"]
+    assert query["filter"] == [{"term": {"type": "artists"}}]
+    assert "type" not in str(query["should"])

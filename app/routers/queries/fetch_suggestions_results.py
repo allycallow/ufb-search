@@ -1,5 +1,6 @@
 from os import getenv
 
+from app.routers.queries.name_match import RESULT_FIELDS
 from app.utils import client
 
 INDEX_NAME = getenv("OPENSEARCH_INDEX_NAME", "upfrontbeats")
@@ -11,6 +12,7 @@ async def fetch_suggestions_results(
     response = client.search(
         index=INDEX_NAME,
         body={
+            "_source": RESULT_FIELDS,
             "size": 10,
             "query": {
                 "bool": {
