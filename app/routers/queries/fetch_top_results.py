@@ -1,3 +1,4 @@
+import asyncio
 import re
 from os import getenv
 
@@ -33,7 +34,8 @@ TRACK_SORT: list[dict[str, object]] = [{"popularity": {"order": "desc"}}]
 
 
 async def fetch_top_results(query: str) -> list[dict[str, object]]:
-    response = client.search(
+    response = await asyncio.to_thread(
+        client.search,
         index=INDEX_NAME,
         body={
             "_source": RESULT_FIELDS,
@@ -75,7 +77,7 @@ async def fetch_top_results(query: str) -> list[dict[str, object]]:
         return hits
 
     try:
-        releases, tracks = _fetch_children(lead)
+        releases, tracks = await asyncio.to_thread(_fetch_children, lead)
     except Exception as e:
         logger.warning(
             "Failed to fetch children for search lead",
